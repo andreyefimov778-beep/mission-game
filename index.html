@@ -1,1 +1,695 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МИССИЯ НА ЗЕМЛЮ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Russo+One&family=Rajdhani:wght@400;600;700&display=swap');
+:root{
+  --bg:#060810;--bg2:#0a0d15;--panel:#0d1220;--panel2:#111828;
+  --border:#1a2a3a;--border2:#243040;
+  --accent:#00c8ff;--accent2:#ff6600;--green:#00ff88;--red:#ff2244;
+  --yellow:#ffc800;--purple:#8855ff;--text:#a8c8d8;--dim:#3a5a6a;
+  --glow-b:0 0 15px rgba(0,200,255,0.4);--glow-o:0 0 15px rgba(255,102,0,0.4);
+  --glow-g:0 0 15px rgba(0,255,136,0.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Share Tech Mono',monospace;color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999;}
 
+/* ===== START SCREEN ===== */
+#start-screen{position:fixed;inset:0;z-index:500;background:#000;display:flex;flex-direction:column;overflow:hidden;}
+.start-bg{position:absolute;inset:0;background:url('hangar.png') center center/cover no-repeat;filter:brightness(0.45);}
+.start-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(0,10,20,0.4) 60%,rgba(0,0,0,0.2) 100%);}
+.start-content{position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:40px 60px;gap:50px;}
+
+.smith-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;animation:smithIn 1.2s ease forwards;opacity:0;}
+@keyframes smithIn{from{transform:translateX(-60px);opacity:0}to{transform:translateX(0);opacity:1}}
+.smith-img{width:280px;border-bottom:2px solid var(--accent);filter:drop-shadow(0 0 30px rgba(0,200,255,0.3));}
+.smith-name{font-family:'Russo One',sans-serif;font-size:12px;letter-spacing:4px;color:var(--accent);text-shadow:var(--glow-b);margin-top:8px;text-transform:uppercase;}
+.smith-rank{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:2px;}
+
+.start-right{flex:1;display:flex;flex-direction:column;gap:24px;animation:rightIn 1.4s ease forwards;opacity:0;}
+@keyframes rightIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.start-logo{font-family:'Russo One',sans-serif;font-size:42px;letter-spacing:8px;color:#fff;text-transform:uppercase;line-height:1;}
+.start-logo span{color:var(--accent);text-shadow:var(--glow-b);}
+.start-subtitle{font-size:10px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-top:-16px;}
+
+.briefing-box{background:rgba(0,10,25,0.78);border:1px solid var(--border2);border-left:3px solid var(--accent);padding:20px 24px;max-width:620px;backdrop-filter:blur(6px);}
+.briefing-from{font-size:9px;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:8px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+.briefing-text{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;color:#ddeeff;line-height:1.7;}
+.briefing-text .hi{color:var(--accent);}
+.briefing-text .warn{color:var(--yellow);}
+
+.task-list{display:flex;flex-direction:column;gap:6px;}
+.task-item{display:flex;align-items:center;gap:12px;background:rgba(0,200,255,0.04);border:1px solid rgba(0,200,255,0.1);padding:8px 14px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;}
+.task-num{color:var(--accent);font-size:10px;letter-spacing:1px;min-width:24px;}
+
+.start-bottom{display:flex;align-items:center;gap:20px;margin-top:4px;}
+.btn-start{font-family:'Russo One',sans-serif;font-size:14px;letter-spacing:4px;padding:14px 40px;background:linear-gradient(135deg,rgba(0,200,255,0.2),rgba(0,200,255,0.05));border:1px solid var(--accent);color:var(--accent);cursor:pointer;transition:all 0.2s;text-transform:uppercase;animation:pulse-btn 2s infinite;}
+@keyframes pulse-btn{0%,100%{box-shadow:0 0 15px rgba(0,200,255,0.4)}50%{box-shadow:0 0 30px rgba(0,200,255,0.7)}}
+.btn-start:hover{background:rgba(0,200,255,0.25);transform:scale(1.03);}
+.music-ctrl{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--dim);letter-spacing:1px;cursor:pointer;padding:6px 12px;border:1px solid var(--border);transition:all 0.2s;}
+.music-ctrl:hover{border-color:var(--accent2);color:var(--accent2);}
+
+/* ===== HEADER ===== */
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:0 16px;height:48px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0.5;}
+.logo{font-family:'Russo One',sans-serif;font-size:18px;color:#fff;letter-spacing:4px;}
+.logo span{color:var(--accent);text-shadow:var(--glow-b);}
+.header-center{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--dim);letter-spacing:2px;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:var(--glow-g);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.header-right{display:flex;align-items:center;gap:12px;}
+.babki-display{display:flex;align-items:center;gap:8px;background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);padding:4px 12px;border-radius:2px;}
+.babki-label{font-size:9px;color:var(--dim);letter-spacing:1px;}
+.babki-val{font-family:'Russo One',sans-serif;font-size:16px;color:var(--yellow);text-shadow:0 0 10px rgba(255,200,0,0.5);transition:all 0.3s;}
+.babki-val.pop{animation:bpop 0.4s ease;}
+@keyframes bpop{0%{transform:scale(1)}50%{transform:scale(1.3);color:#fff}100%{transform:scale(1)}}
+.btn-hdr{font-family:'Russo One',sans-serif;font-size:11px;letter-spacing:2px;padding:6px 14px;border:1px solid;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+.btn-hdr.quiz{background:linear-gradient(135deg,rgba(0,200,255,0.15),rgba(0,200,255,0.05));border-color:var(--accent);color:var(--accent);}
+.btn-hdr.quiz:hover{background:rgba(0,200,255,0.2);box-shadow:var(--glow-b);}
+.btn-hdr.bag{background:linear-gradient(135deg,rgba(255,102,0,0.15),rgba(255,102,0,0.05));border-color:var(--accent2);color:var(--accent2);}
+.btn-hdr.bag:hover{background:rgba(255,102,0,0.2);box-shadow:var(--glow-o);}
+
+/* ===== LAYOUT ===== */
+.main{display:grid;grid-template-columns:230px 1fr 260px;flex:1;overflow:hidden;gap:1px;background:var(--border);}
+.panel{background:var(--panel);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
+.panel-hdr{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;color:var(--dim);padding:10px 14px 8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;position:sticky;top:0;background:var(--panel);z-index:2;text-transform:uppercase;}
+.panel-hdr .dot{width:5px;height:5px;background:var(--accent2);box-shadow:var(--glow-o);flex-shrink:0;}
+
+/* ===== VIEWPORT ===== */
+.viewport{background:var(--bg2);position:relative;display:flex;flex-direction:column;overflow:hidden;}
+.vp-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--border);background:var(--panel);flex-shrink:0;}
+.vp-title{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;color:var(--dim);text-transform:uppercase;}
+.vp-ship-info{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;color:var(--accent);letter-spacing:2px;}
+
+.hangar{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.hangar-bg{position:absolute;inset:0;background:url('hangar.png') center center/cover no-repeat;filter:brightness(0.32) saturate(0.7);}
+.hangar-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 25%,rgba(0,0,0,0.65) 100%);}
+
+.ship-display{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.ship-img-wrap{filter:drop-shadow(0 0 40px rgba(0,200,255,0.2)) drop-shadow(0 20px 50px rgba(0,0,0,0.9));transition:filter 0.4s;}
+.ship-img-wrap:hover{filter:drop-shadow(0 0 60px rgba(0,200,255,0.35)) drop-shadow(0 20px 50px rgba(0,0,0,0.9));}
+.ship-img-wrap img{width:620px;max-width:90%;display:block;}
+.ship-name-plate{font-family:'Russo One',sans-serif;font-size:10px;letter-spacing:5px;color:var(--dim);text-transform:uppercase;text-align:center;}
+
+/* STATS BAR */
+.stats-bar{background:var(--panel);border-top:1px solid var(--border);padding:8px 16px;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;flex-shrink:0;}
+.stat-item{display:flex;flex-direction:column;gap:3px;}
+.stat-lbl{font-size:8px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;}
+.stat-bar-track{height:3px;background:var(--border2);border-radius:1px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:1px;transition:width 0.5s ease;}
+.fill-dps{background:var(--accent2);}
+.fill-shield{background:var(--accent);}
+.fill-armor{background:#6688aa;}
+.fill-speed{background:var(--green);}
+.fill-morale{background:var(--purple);}
+.fill-range{background:var(--yellow);}
+.stat-num{font-size:9px;color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;}
+
+/* ===== SHOP ===== */
+.shop-body{padding:8px;}
+.category-sep{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--accent2);padding:10px 4px 4px;display:flex;align-items:center;gap:6px;text-transform:uppercase;}
+.category-sep::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+.part-card{background:var(--panel2);border:1px solid var(--border);padding:8px 10px;margin-bottom:3px;cursor:pointer;transition:all 0.15s;}
+.part-card:hover:not(.owned):not(.cant-afford){border-color:var(--accent2);transform:translateX(2px);}
+.part-card.owned{border-color:var(--green);background:rgba(0,255,136,0.04);cursor:default;}
+.part-card.cant-afford{opacity:0.4;cursor:not-allowed;}
+.part-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.part-name{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;color:#fff;letter-spacing:1px;}
+.part-slot-tag{font-size:8px;padding:1px 5px;border-radius:1px;letter-spacing:1px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+.tag-high{background:rgba(255,102,0,0.2);color:var(--accent2);border:1px solid rgba(255,102,0,0.3);}
+.tag-mid{background:rgba(0,200,255,0.15);color:var(--accent);border:1px solid rgba(0,200,255,0.3);}
+.tag-low{background:rgba(100,120,160,0.2);color:#6688aa;border:1px solid rgba(100,120,160,0.3);}
+.tag-civ{background:rgba(136,85,255,0.15);color:var(--purple);border:1px solid rgba(136,85,255,0.3);}
+.part-desc{font-size:9px;color:var(--dim);line-height:1.4;margin-bottom:5px;}
+.part-footer{display:flex;align-items:center;justify-content:space-between;}
+.part-cost{font-size:10px;color:var(--yellow);display:flex;align-items:center;gap:4px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+.part-stats-mini{font-size:8px;color:var(--dim);display:flex;gap:6px;}
+.pstat.cpu{color:#4488ff;}
+.owned-badge{font-size:8px;color:var(--green);letter-spacing:1px;font-family:'Rajdhani',sans-serif;}
+
+/* ===== SLOTS ===== */
+.slots-body{padding:8px;}
+.resource-meters{display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--bg2);border:1px solid var(--border);margin-bottom:10px;}
+.res-row{display:flex;align-items:center;gap:8px;}
+.res-label{font-size:9px;color:var(--dim);letter-spacing:1px;width:30px;flex-shrink:0;}
+.res-track{flex:1;height:5px;background:var(--border2);border-radius:1px;overflow:hidden;}
+.res-fill{height:100%;border-radius:1px;transition:width 0.5s ease;}
+.res-fill.cpu{background:linear-gradient(90deg,#4488ff,#00ccff);}
+.res-fill.pg{background:linear-gradient(90deg,var(--accent2),var(--yellow));}
+.res-fill.warning{background:var(--red)!important;}
+.res-val{font-size:9px;color:var(--text);width:55px;text-align:right;font-family:'Rajdhani',sans-serif;font-weight:600;flex-shrink:0;}
+.slot-group-lbl{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 4px 4px;display:flex;align-items:center;gap:6px;}
+.slot-group-lbl.high{color:var(--accent2);}
+.slot-group-lbl.mid{color:var(--accent);}
+.slot-group-lbl.low{color:#6688aa;}
+.slot-group-lbl.civ{color:var(--purple);}
+.slot-group-lbl::after{content:'';flex:1;height:1px;background:var(--border2);}
+.slot{background:var(--panel2);border:1px dashed var(--border2);padding:7px 10px;margin-bottom:3px;cursor:pointer;transition:all 0.2s;min-height:42px;display:flex;align-items:center;gap:8px;}
+.slot:hover{border-color:var(--accent);background:rgba(0,200,255,0.03);}
+.slot.filled-high{border-style:solid;border-color:rgba(255,102,0,0.5);background:rgba(255,102,0,0.04);}
+.slot.filled-mid{border-style:solid;border-color:rgba(0,200,255,0.5);background:rgba(0,200,255,0.04);}
+.slot.filled-low{border-style:solid;border-color:rgba(100,120,160,0.5);background:rgba(100,120,160,0.04);}
+.slot.filled-civ{border-style:solid;border-color:rgba(136,85,255,0.5);background:rgba(136,85,255,0.04);}
+.slot-icon{width:24px;height:24px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.slot-icon.empty{background:var(--border);color:var(--dim);font-size:10px;}
+.slot-info{flex:1;min-width:0;}
+.slot-name{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slot-sublabel{font-size:8px;color:var(--dim);letter-spacing:1px;}
+.slot-remove-btn{width:16px;height:16px;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:12px;cursor:pointer;opacity:0;transition:opacity 0.15s;flex-shrink:0;}
+.slot:hover .slot-remove-btn{opacity:0.7;}
+.slot-remove-btn:hover{opacity:1!important;background:rgba(255,34,68,0.15);}
+
+/* ===== MODALS ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--panel);border:1px solid var(--border2);width:560px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,0,0,0.8),0 0 30px rgba(0,200,255,0.1);animation:slideUp 0.25s ease;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);flex-shrink:0;}
+.modal-title{font-family:'Russo One',sans-serif;font-size:14px;letter-spacing:3px;color:#fff;text-transform:uppercase;}
+.modal-close{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:16px;cursor:pointer;border:1px solid var(--border);transition:all 0.15s;}
+.modal-close:hover{color:var(--red);border-color:var(--red);}
+.modal-body{padding:16px 18px;overflow-y:auto;}
+
+/* BACKPACK */
+.bp-empty{text-align:center;padding:30px;color:var(--dim);font-size:12px;letter-spacing:1px;}
+.bp-item{background:var(--panel2);border:1px solid var(--border);padding:10px 14px;margin-bottom:4px;display:flex;align-items:center;gap:12px;}
+.bp-icon{font-size:20px;flex-shrink:0;}
+.bp-info{flex:1;}
+.bp-name{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:#fff;}
+.bp-meta{font-size:9px;color:var(--dim);margin-top:2px;}
+.bp-status{font-size:9px;padding:2px 6px;border-radius:1px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;}
+.bp-status.installed{background:rgba(0,200,255,0.1);color:var(--accent);border:1px solid rgba(0,200,255,0.3);}
+.bp-status.ready{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.3);}
+
+/* QUIZ */
+.quiz-cat{font-size:9px;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:6px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+.quiz-q{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:600;color:#fff;line-height:1.4;margin-bottom:20px;min-height:50px;}
+.quiz-reward{font-size:10px;color:var(--dim);margin-bottom:16px;display:flex;align-items:center;gap:6px;}
+.reward-val{color:var(--yellow);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.quiz-opt{background:var(--panel2);border:1px solid var(--border2);padding:12px 14px;cursor:pointer;transition:all 0.15s;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;color:var(--text);text-align:left;display:flex;align-items:flex-start;gap:10px;}
+.quiz-opt:hover:not(.disabled){border-color:var(--accent);color:#fff;background:rgba(0,200,255,0.06);}
+.quiz-opt.correct{border-color:var(--green);background:rgba(0,255,136,0.1);color:var(--green);}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(255,34,68,0.08);color:var(--red);opacity:0.7;}
+.quiz-opt.disabled{cursor:default;pointer-events:none;}
+.opt-letter{font-size:10px;color:var(--dim);min-width:14px;flex-shrink:0;margin-top:1px;}
+.quiz-opt.correct .opt-letter{color:var(--green);}
+.quiz-opt.wrong .opt-letter{color:var(--red);}
+.quiz-result{margin-top:16px;padding:12px 14px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;display:none;align-items:center;justify-content:space-between;}
+.quiz-result.show{display:flex;}
+.quiz-result.win{background:rgba(0,255,136,0.1);border:1px solid var(--green);color:var(--green);}
+.quiz-result.lose{background:rgba(255,34,68,0.08);border:1px solid var(--red);color:var(--red);}
+.quiz-next-btn{font-family:'Russo One',sans-serif;font-size:10px;letter-spacing:2px;padding:6px 14px;background:transparent;border:1px solid currentColor;color:inherit;cursor:pointer;transition:all 0.15s;text-transform:uppercase;}
+.quiz-next-btn:hover{background:rgba(255,255,255,0.05);}
+
+/* SLOT SELECT */
+.slot-select-list{display:flex;flex-direction:column;gap:6px;}
+.slot-select-item{background:var(--panel2);border:1px solid var(--border);padding:10px 14px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:12px;}
+.slot-select-item:hover{border-color:var(--accent);transform:translateX(4px);}
+.ssi-icon{font-size:20px;}
+.ssi-info{flex:1;}
+.ssi-name{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:#fff;}
+.ssi-reason{font-size:9px;color:var(--dim);margin-top:2px;}
+.ssi-arrow{color:var(--accent);font-size:14px;}
+
+/* NOTIFICATION */
+.notif{position:fixed;top:60px;right:20px;background:var(--panel);border:1px solid var(--border2);padding:10px 16px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;color:#fff;z-index:2000;animation:notifIn 0.25s ease,notifOut 0.25s ease 2.5s forwards;display:flex;align-items:center;gap:10px;max-width:300px;}
+.notif.success{border-color:var(--green);}
+.notif.error{border-color:var(--red);}
+.notif.info{border-color:var(--accent);}
+@keyframes notifIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes notifOut{from{opacity:1}to{opacity:0;pointer-events:none}}
+</style>
+</head>
+<body>
+
+<!-- ===== START SCREEN ===== -->
+<div id="start-screen">
+  <div class="start-bg"></div>
+  <div class="start-overlay"></div>
+  <audio id="start-music" loop>
+    <source src="theme.mp3" type="audio/mp3">
+  </audio>
+  <div class="start-content">
+    <div class="smith-wrap">
+      <img class="smith-img" src="smith.png" alt="Смит">
+      <div class="smith-name">◈ СМИТ</div>
+      <div class="smith-rank">СТАРШИЙ МЕХАНИК · ВЕРФЬ СЕКТОР 7</div>
+    </div>
+    <div class="start-right">
+      <div>
+        <div class="start-logo">МИССИЯ<br><span>НА ЗЕМЛЮ</span></div>
+        <div class="start-subtitle">◈ ОРБИТАЛЬНАЯ ВЕРФЬ · СЕКТОР 7 · СТАНДАРТНЫЙ ГОД 2387</div>
+      </div>
+      <div class="briefing-box">
+        <div class="briefing-from">◈ ВХОДЯЩЕЕ СООБЩЕНИЕ · ОТ: СМИТ, СТАРШИЙ МЕХАНИК</div>
+        <div class="briefing-text">
+          Слушай внимательно, <span class="hi">Капитан</span>.<br><br>
+          Земля — это не миф. Мы получили сигнал. Координаты подтверждены.<br>
+          У нас есть <span class="warn">одна попытка</span>.<br><br>
+          Корабль стоит в ангаре — голый корпус. Твоя задача: собрать его,
+          укомплектовать системами и <span class="hi">подготовить к миссии</span>.<br><br>
+          Денег нет. Зарабатывай <span class="warn">Бабки</span> — отвечай на вопросы.
+          Покупай модули. Устанавливай. Не ошибись с приоритетами.
+        </div>
+      </div>
+      <div class="task-list">
+        <div class="task-item"><span class="task-num">01</span><span>Заработай Бабки — отвечай на вопросы</span></div>
+        <div class="task-item"><span class="task-num">02</span><span>Купи боевые и гражданские модули в магазине</span></div>
+        <div class="task-item"><span class="task-num">03</span><span>Установи модули в слоты корабля</span></div>
+        <div class="task-item"><span class="task-num">04</span><span>Следи за CPU, Powergrid и моралью экипажа</span></div>
+      </div>
+      <div class="start-bottom">
+        <button class="btn-start" onclick="startGame()">▶ НАЧАТЬ МИССИЮ</button>
+        <div class="music-ctrl" onclick="toggleMusic()">
+          <span>🎵</span>
+          <span id="music-label">МУЗЫКА: ВКЛ</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="game-screen" style="display:none;flex:1;flex-direction:column;height:100vh;">
+  <header>
+    <div class="logo">МИССИЯ <span>НА ЗЕМЛЮ</span></div>
+    <div class="header-center"><div class="status-dot"></div>ОРБИТАЛЬНАЯ ВЕРФЬ · СЕКТОР 7</div>
+    <div class="header-right">
+      <div class="babki-display">
+        <span>💰</span>
+        <div>
+          <div class="babki-label">БАБКИ</div>
+          <div class="babki-val" id="babki">5000</div>
+        </div>
+      </div>
+      <button class="btn-hdr bag" onclick="openBackpack()">🎒 РЮКЗАК</button>
+      <button class="btn-hdr quiz" onclick="openQuiz()">▶ ЗАРАБОТАТЬ БАБКИ</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- LEFT: SHOP -->
+    <div class="panel">
+      <div class="panel-hdr"><div class="dot"></div>МАГАЗИН МОДУЛЕЙ</div>
+      <div class="shop-body" id="shop-body"></div>
+    </div>
+
+    <!-- CENTER: VIEWPORT -->
+    <div class="viewport">
+      <div class="vp-hdr">
+        <div class="vp-title">◈ ВЕРФЬ / СБОРКА</div>
+        <div class="vp-ship-info">MOTHERSHIP · КЛАСС: НЕИЗВЕСТЕН</div>
+      </div>
+      <div class="hangar">
+        <div class="hangar-bg"></div>
+        <div class="hangar-vignette"></div>
+        <div class="ship-display">
+          <div class="ship-img-wrap">
+            <img src="Mothership.png" alt="Mothership">
+          </div>
+          <div class="ship-name-plate">◈ МАТЕРИНСКИЙ КОРАБЛЬ · ОРБИТАЛЬНАЯ ВЕРФЬ СЕКТОР 7</div>
+        </div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-lbl">DPS</div><div class="stat-bar-track"><div class="stat-bar-fill fill-dps" id="stat-dps" style="width:0%"></div></div><div class="stat-num" id="stat-dps-val">0</div></div>
+        <div class="stat-item"><div class="stat-lbl">ЩИТЫ</div><div class="stat-bar-track"><div class="stat-bar-fill fill-shield" id="stat-shield" style="width:0%"></div></div><div class="stat-num" id="stat-shield-val">0</div></div>
+        <div class="stat-item"><div class="stat-lbl">БРОНЯ</div><div class="stat-bar-track"><div class="stat-bar-fill fill-armor" id="stat-armor" style="width:0%"></div></div><div class="stat-num" id="stat-armor-val">0</div></div>
+        <div class="stat-item"><div class="stat-lbl">СКОРОСТЬ</div><div class="stat-bar-track"><div class="stat-bar-fill fill-speed" id="stat-speed" style="width:0%"></div></div><div class="stat-num" id="stat-speed-val">0</div></div>
+        <div class="stat-item"><div class="stat-lbl">МОРАЛЬ</div><div class="stat-bar-track"><div class="stat-bar-fill fill-morale" id="stat-morale" style="width:0%"></div></div><div class="stat-num" id="stat-morale-val">0</div></div>
+        <div class="stat-item"><div class="stat-lbl">ДАЛЬНОСТЬ</div><div class="stat-bar-track"><div class="stat-bar-fill fill-range" id="stat-range" style="width:0%"></div></div><div class="stat-num" id="stat-range-val">0 AU</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SLOTS -->
+    <div class="panel">
+      <div class="panel-hdr"><div class="dot"></div>КОНФИГУРАЦИЯ</div>
+      <div class="slots-body" id="slots-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BACKPACK MODAL -->
+<div class="modal-overlay" id="backpack-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">🎒 РЮКЗАК — КУПЛЕННЫЕ МОДУЛИ</div>
+      <div class="modal-close" onclick="closeBackpack()">✕</div>
+    </div>
+    <div class="modal-body" id="backpack-body"></div>
+  </div>
+</div>
+
+<!-- QUIZ MODAL -->
+<div class="modal-overlay" id="quiz-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">💰 ЗАРАБАТЫВАЕМ БАБКИ</div>
+      <div class="modal-close" onclick="closeQuiz()">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="quiz-cat" id="quiz-cat"></div>
+      <div class="quiz-q" id="quiz-q"></div>
+      <div class="quiz-reward">НАГРАДА: <span class="reward-val" id="quiz-reward-val"></span> БАБОК</div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-result" id="quiz-result">
+        <span id="quiz-result-text"></span>
+        <button class="quiz-next-btn" onclick="nextQuestion()">СЛЕДУЮЩИЙ ▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLOT SELECT MODAL -->
+<div class="modal-overlay" id="slot-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="slot-modal-title">ВЫБОР МОДУЛЯ</div>
+      <div class="modal-close" onclick="closeSlotModal()">✕</div>
+    </div>
+    <div class="modal-body"><div class="slot-select-list" id="slot-select-list"></div></div>
+  </div>
+</div>
+
+<script>
+// ===== SINGLE HULL: MOTHERSHIP =====
+const HULL = {
+  id: 'mothership',
+  name: 'MOTHERSHIP',
+  cpu: 600, pg: 800,
+  slots: { high: 4, mid: 4, low: 4, civ: 4 },
+  baseStats: { dps:0, shield:30, armor:50, speed:30, morale:10, range:50 }
+};
+
+const MODULES = [
+  {id:'turret1',name:'ИМПУЛЬСНАЯ ТУРЕЛЬ',cat:'HIGH',icon:'🔫',desc:'Лазерная турель ближнего боя. Надёжная, дешёвая.',cost:800,cpu:35,pg:60,stats:{dps:25}},
+  {id:'turret2',name:'РЕЙЛГАН MK-II',cat:'HIGH',icon:'⚡',desc:'Высокий урон, большой расход энергии.',cost:2200,cpu:55,pg:120,stats:{dps:60}},
+  {id:'rocket1',name:'РАКЕТНИЦА T1',cat:'HIGH',icon:'🚀',desc:'Ракеты малого класса.',cost:1200,cpu:40,pg:80,stats:{dps:40}},
+  {id:'rocket2',name:'КРЫЛАТАЯ РАКЕТА',cat:'HIGH',icon:'💥',desc:'Тяжёлые ракеты. Большой урон.',cost:3500,cpu:70,pg:150,stats:{dps:90}},
+  {id:'shield1',name:'ЩИТ-ГЕНЕРАТОР T1',cat:'MID',icon:'🛡️',desc:'Базовый силовой щит.',cost:900,cpu:25,pg:55,stats:{shield:30}},
+  {id:'shield2',name:'АДА-ЩИТ MK-III',cat:'MID',icon:'💠',desc:'Адаптивный щит.',cost:2800,cpu:40,pg:90,stats:{shield:70}},
+  {id:'nav1',name:'НАВИГАТОР-ИИ',cat:'MID',icon:'🧭',desc:'Автономная навигация. +15 AU.',cost:1500,cpu:45,pg:30,stats:{range:15}},
+  {id:'sensor1',name:'СЕНСОРНЫЙ БЛОК',cat:'MID',icon:'📡',desc:'Дальнее обнаружение.',cost:700,cpu:30,pg:20,stats:{dps:10}},
+  {id:'ai1',name:'ТАКТИЧЕСКИЙ ИИ',cat:'MID',icon:'🤖',desc:'Боевой ИИ-ассистент.',cost:4000,cpu:80,pg:50,stats:{dps:15,shield:15}},
+  {id:'armor1',name:'СТАЛЬНАЯ БРОНЯ',cat:'LOW',icon:'🔩',desc:'Базовое бронирование корпуса.',cost:600,cpu:0,pg:0,stats:{armor:25}},
+  {id:'armor2',name:'НАНОБРОНЬ',cat:'LOW',icon:'⚙️',desc:'Самовосстанавливающееся покрытие.',cost:3200,cpu:20,pg:10,stats:{armor:60}},
+  {id:'engine1',name:'МАРШЕВЫЙ ДВИЖОК T1',cat:'LOW',icon:'🔥',desc:'Основной двигатель.',cost:1000,cpu:10,pg:80,stats:{speed:20,range:10}},
+  {id:'engine2',name:'ФОРСАЖНЫЙ ДВИЖОК',cat:'LOW',icon:'💨',desc:'Высокоскоростной.',cost:2500,cpu:15,pg:140,stats:{speed:45}},
+  {id:'maneuver1',name:'МАНЕВРОВЫЕ ДЮЗЫ',cat:'LOW',icon:'🔄',desc:'Боковые двигатели.',cost:800,cpu:5,pg:40,stats:{speed:15}},
+  {id:'lab1',name:'НАУЧНАЯ ЛАБОРАТОРИЯ',cat:'CIV',icon:'🔬',desc:'Исследования в пути. +20 AU дальности.',cost:2000,cpu:0,pg:0,stats:{range:20}},
+  {id:'gym1',name:'СПОРТЗАЛ',cat:'CIV',icon:'🏋️',desc:'Поддержание боеспособности. +25 мораль.',cost:800,cpu:0,pg:0,stats:{morale:25}},
+  {id:'med1',name:'МЕДИЦИНСКИЙ БЛОК',cat:'CIV',icon:'🏥',desc:'Медотсек для экипажа.',cost:1200,cpu:0,pg:0,stats:{morale:15}},
+  {id:'garden1',name:'ОРАНЖЕРЕЯ',cat:'CIV',icon:'🌱',desc:'Жизнеобеспечение. +30 AU дальности.',cost:1500,cpu:0,pg:0,stats:{range:30}},
+  {id:'quarters1',name:'ЖИЛОЙ БЫТ',cat:'CIV',icon:'🛋️',desc:'Комфортное жильё экипажа. +10 мораль.',cost:500,cpu:0,pg:0,stats:{morale:10}},
+];
+
+const QUIZ = [
+  {cat:'АСТРОФИЗИКА',q:'Какова примерная масса нашего Солнца?',opts:['2×10³⁰ кг','5×10²⁴ кг','7×10²² кг','1×10³⁵ кг'],ans:0,reward:150},
+  {cat:'ФИЗИКА',q:'Первая космическая скорость Земли?',opts:['7,9 км/с','11,2 км/с','3,5 км/с','16,7 км/с'],ans:0,reward:100},
+  {cat:'ИСТОРИЯ',q:'Год запуска первого искусственного спутника Земли?',opts:['1957','1961','1969','1953'],ans:0,reward:100},
+  {cat:'ФИЗИКА',q:'Что такое точка Лагранжа?',opts:['Точка равновесия гравитационных сил двух тел','Центр галактики','Максимальная точка орбиты','Место рождения звезды'],ans:0,reward:200},
+  {cat:'ХИМИЯ',q:'Что составляет большую часть атмосферы Земли?',opts:['Азот (N₂)','Кислород (O₂)','Аргон (Ar)','CO₂'],ans:0,reward:80},
+  {cat:'ЛОГИКА',q:'Корабль летит 10 лет на скорости 0.5c. Сколько времени пройдёт на Земле?',opts:['Больше 10 лет','Ровно 10 лет','Меньше 10 лет','Зависит от направления'],ans:0,reward:250},
+  {cat:'АСТРОФИЗИКА',q:'Что такое красное смещение?',opts:['Удаление объекта от наблюдателя','Приближение объекта','Изменение температуры звезды','Вспышка сверхновой'],ans:0,reward:180},
+  {cat:'ИСТОРИЯ',q:'Алексей Леонов — первый в открытом космосе. В каком году?',opts:['1965','1969','1961','1972'],ans:0,reward:120},
+  {cat:'ФИЗИКА',q:'Вторая космическая скорость — это скорость для:',opts:['Выхода из поля тяготения Земли','Выхода на орбиту','Полёта до Луны','Скорость МКС'],ans:0,reward:150},
+  {cat:'ЛОГИКА',q:'3 турели по 20 выстрелов в минуту. Сколько выстрелов за час?',opts:['3600','3000','2400','1800'],ans:0,reward:200},
+  {cat:'ГЕОГРАФИЯ',q:'Какой город ближайший к экватору?',opts:['Кито (Эквадор)','Найроби (Кения)','Богота (Колумбия)','Сингапур'],ans:0,reward:100},
+  {cat:'ХИМИЯ',q:'Ракетное топливо LOX/LH2 — это:',opts:['Жидкий кислород + жидкий водород','Азот + водород','Керосин + кислород','Метан + кислород'],ans:0,reward:180},
+  {cat:'АСТРОФИЗИКА',q:'Горизонт событий чёрной дыры зависит от:',opts:['Массы чёрной дыры','Её температуры','Расстояния от Земли','Возраста вселенной'],ans:0,reward:220},
+  {cat:'ФИЗИКА',q:'Что такое реактивная тяга?',opts:['Выброс массы в одну сторону создаёт силу в другую','Горение топлива создаёт давление','Магнитное ускорение частиц','Ядерный распад'],ans:0,reward:150},
+  {cat:'ЛОГИКА',q:'Число 42 — ответ на главный вопрос вселенной. Откуда?',opts:['Автостопом по галактике','1984','Дюна','Основание'],ans:0,reward:120},
+];
+
+// ===== STATE =====
+let state = {
+  babki: 5000,
+  installedModules: {},
+  ownedModules: [],
+  quizIdx: 0,
+  quizAnswered: false,
+  pendingSlot: null,
+  musicOn: true,
+};
+
+// ===== START =====
+window.addEventListener('load', () => {
+  state.quizIdx = Math.floor(Math.random() * QUIZ.length);
+  const music = document.getElementById('start-music');
+  music.volume = 0.5;
+  music.play().catch(() => {
+    document.getElementById('music-label').textContent = '▶ НАЖМИ ДЛЯ МУЗЫКИ';
+    state.musicOn = false;
+  });
+});
+
+function startGame() {
+  document.getElementById('start-music').pause();
+  document.getElementById('start-screen').style.display = 'none';
+  const gs = document.getElementById('game-screen');
+  gs.style.display = 'flex';
+  gs.style.flexDirection = 'column';
+  renderShop();
+  renderSlots();
+  recalcStats();
+}
+
+function toggleMusic() {
+  const music = document.getElementById('start-music');
+  state.musicOn = !state.musicOn;
+  state.musicOn ? music.play() : music.pause();
+  document.getElementById('music-label').textContent = state.musicOn ? 'МУЗЫКА: ВКЛ' : 'МУЗЫКА: ВЫКЛ';
+}
+
+// ===== SHOP =====
+function renderShop() {
+  const cats = [
+    {key:'HIGH',label:'HIGH SLOT — ОРУЖИЕ',cls:'tag-high'},
+    {key:'MID',label:'MID SLOT — ЭЛЕКТРОНИКА',cls:'tag-mid'},
+    {key:'LOW',label:'LOW SLOT — БРОНЯ / ДВИЖКИ',cls:'tag-low'},
+    {key:'CIV',label:'CIVILIAN — БЫТ / НАУКА',cls:'tag-civ'},
+  ];
+  document.getElementById('shop-body').innerHTML = cats.map(cat => `
+    <div class="category-sep">${cat.label}</div>
+    ${MODULES.filter(m=>m.cat===cat.key).map(m => {
+      const owned = state.ownedModules.includes(m.id);
+      const cant = !owned && state.babki < m.cost;
+      return `<div class="part-card ${owned?'owned':''} ${cant?'cant-afford':''}" onclick="buyModule('${m.id}')">
+        <div class="part-header">
+          <div class="part-name">${m.icon} ${m.name}</div>
+          <div class="part-slot-tag ${cat.cls}">${cat.key}</div>
+        </div>
+        <div class="part-desc">${m.desc}</div>
+        <div class="part-footer">
+          ${owned ? '<div class="owned-badge">✓ В РЮКЗАКЕ</div>' : `<div class="part-cost">💰 ${m.cost.toLocaleString()}</div>`}
+          ${m.cpu>0 ? `<div class="part-stats-mini"><span class="pstat cpu">CPU ${m.cpu}</span></div>` : ''}
+        </div>
+      </div>`;
+    }).join('')}
+  `).join('');
+}
+
+function buyModule(id) {
+  if (state.ownedModules.includes(id)) { showNotif('Уже куплено — установи на корабль!','info'); return; }
+  const mod = MODULES.find(m=>m.id===id);
+  if (!mod) return;
+  if (state.babki < mod.cost) { showNotif('Не хватает Бабок! Зарабатывай 💰','error'); return; }
+  state.babki -= mod.cost;
+  state.ownedModules.push(id);
+  updateBabki();
+  renderShop();
+  showNotif(`${mod.icon} ${mod.name} — куплено!`,'success');
+}
+
+// ===== BACKPACK =====
+function openBackpack() {
+  const body = document.getElementById('backpack-body');
+  if (state.ownedModules.length === 0) {
+    body.innerHTML = '<div class="bp-empty">🎒 Рюкзак пуст — купи модули в магазине</div>';
+  } else {
+    const installed = Object.values(state.installedModules);
+    body.innerHTML = state.ownedModules.map(id => {
+      const m = MODULES.find(x=>x.id===id);
+      if (!m) return '';
+      const isInstalled = installed.includes(id);
+      return `<div class="bp-item">
+        <div class="bp-icon">${m.icon}</div>
+        <div class="bp-info">
+          <div class="bp-name">${m.name}</div>
+          <div class="bp-meta">${m.cat} SLOT · CPU ${m.cpu} · PG ${m.pg} · ${m.cost.toLocaleString()} 💰</div>
+        </div>
+        <div class="bp-status ${isInstalled?'installed':'ready'}">${isInstalled?'УСТАНОВЛЕН':'ГОТОВ'}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('backpack-modal').style.display = 'flex';
+}
+function closeBackpack() { document.getElementById('backpack-modal').style.display = 'none'; }
+
+// ===== SLOTS =====
+function renderSlots() {
+  const h = HULL;
+  let cpuUsed=0, pgUsed=0;
+  Object.values(state.installedModules).forEach(mid => {
+    const m = MODULES.find(x=>x.id===mid);
+    if(m){ cpuUsed+=m.cpu; pgUsed+=m.pg; }
+  });
+  const cpuPct = Math.min(100,(cpuUsed/h.cpu)*100);
+  const pgPct  = Math.min(100,(pgUsed/h.pg)*100);
+  const groups = [
+    {key:'high',label:'HIGH SLOTS',cls:'high',count:h.slots.high,filledCls:'filled-high',cat:'HIGH'},
+    {key:'mid', label:'MID SLOTS', cls:'mid', count:h.slots.mid, filledCls:'filled-mid', cat:'MID'},
+    {key:'low', label:'LOW SLOTS', cls:'low', count:h.slots.low, filledCls:'filled-low', cat:'LOW'},
+    {key:'civ', label:'CIVILIAN',  cls:'civ', count:h.slots.civ, filledCls:'filled-civ', cat:'CIV'},
+  ];
+  document.getElementById('slots-body').innerHTML = `
+    <div class="resource-meters">
+      <div class="res-row"><div class="res-label">CPU</div><div class="res-track"><div class="res-fill cpu ${cpuPct>90?'warning':''}" style="width:${cpuPct}%"></div></div><div class="res-val">${cpuUsed} / ${h.cpu}</div></div>
+      <div class="res-row"><div class="res-label">PG</div><div class="res-track"><div class="res-fill pg ${pgPct>90?'warning':''}" style="width:${pgPct}%"></div></div><div class="res-val">${pgUsed} / ${h.pg}</div></div>
+    </div>
+    ${groups.map(g=>`
+      <div class="slot-group-lbl ${g.cls}">${g.label} <span style="color:var(--dim);font-size:9px;">${g.count} СЛОТА</span></div>
+      ${Array.from({length:g.count},(_,i)=>{
+        const slotId=`${g.key}_${i}`;
+        const mid=state.installedModules[slotId];
+        const mod=mid?MODULES.find(m=>m.id===mid):null;
+        return `<div class="slot ${mod?g.filledCls:''}" onclick="clickSlot('${slotId}','${g.cat}')">
+          <div class="slot-icon ${mod?'':'empty'}">${mod?mod.icon:'+'}</div>
+          <div class="slot-info">
+            <div class="slot-name">${mod?mod.name:'— пусто —'}</div>
+            <div class="slot-sublabel">${mod?`CPU ${mod.cpu} · PG ${mod.pg}`:`${g.label} · СЛОТ ${i+1}`}</div>
+          </div>
+          ${mod?`<div class="slot-remove-btn" onclick="event.stopPropagation();removeModule('${slotId}')">✕</div>`:''}
+        </div>`;
+      }).join('')}
+    `).join('')}`;
+}
+
+function clickSlot(slotId, cat) {
+  if (state.installedModules[slotId]) return;
+  const compatible = MODULES.filter(m =>
+    m.cat===cat &&
+    state.ownedModules.includes(m.id) &&
+    !Object.values(state.installedModules).includes(m.id)
+  );
+  if (compatible.length===0) { showNotif('Нет подходящих модулей. Купи в магазине!','info'); return; }
+  state.pendingSlot = slotId;
+  openSlotModal(cat, compatible);
+}
+
+function removeModule(slotId) {
+  const mid = state.installedModules[slotId];
+  if (!mid) return;
+  const mod = MODULES.find(m=>m.id===mid);
+  delete state.installedModules[slotId];
+  renderSlots(); recalcStats();
+  if(mod) showNotif(`${mod.name} — снят`,'info');
+}
+
+function openSlotModal(cat, mods) {
+  const names = {HIGH:'HIGH SLOT — ОРУЖИЕ',MID:'MID SLOT — ЭЛЕКТРОНИКА',LOW:'LOW SLOT — БРОНЯ',CIV:'CIVILIAN МОДУЛЬ'};
+  document.getElementById('slot-modal-title').textContent = names[cat]||'МОДУЛЬ';
+  document.getElementById('slot-select-list').innerHTML = mods.map(m=>`
+    <div class="slot-select-item" onclick="installModule('${m.id}')">
+      <div class="ssi-icon">${m.icon}</div>
+      <div class="ssi-info">
+        <div class="ssi-name">${m.name}</div>
+        <div class="ssi-reason">${m.desc}${m.cpu>0?` · CPU ${m.cpu} · PG ${m.pg}`:''}</div>
+      </div>
+      <div class="ssi-arrow">→</div>
+    </div>`).join('');
+  document.getElementById('slot-modal').style.display='flex';
+}
+function closeSlotModal() { document.getElementById('slot-modal').style.display='none'; state.pendingSlot=null; }
+
+function installModule(modId) {
+  if (!state.pendingSlot) return;
+  const mod = MODULES.find(m=>m.id===modId);
+  if (!mod) return;
+  let cpuUsed=0, pgUsed=0;
+  Object.values(state.installedModules).forEach(mid=>{const m=MODULES.find(x=>x.id===mid);if(m){cpuUsed+=m.cpu;pgUsed+=m.pg;}});
+  if (cpuUsed+mod.cpu>HULL.cpu) { showNotif('Недостаточно CPU!','error'); return; }
+  if (pgUsed+mod.pg>HULL.pg)   { showNotif('Недостаточно Powergrid!','error'); return; }
+  state.installedModules[state.pendingSlot] = modId;
+  closeSlotModal(); renderSlots(); recalcStats();
+  showNotif(`${mod.icon} ${mod.name} — установлен!`,'success');
+}
+
+// ===== STATS =====
+function recalcStats() {
+  let s = {...HULL.baseStats};
+  Object.values(state.installedModules).forEach(mid=>{
+    const m=MODULES.find(x=>x.id===mid);
+    if(!m) return;
+    Object.entries(m.stats).forEach(([k,v])=>{s[k]=(s[k]||0)+v;});
+  });
+  const MAX={dps:300,shield:300,armor:300,speed:100,morale:100,range:200};
+  const set=(id,val,max,suf='')=>{
+    document.getElementById(`stat-${id}`).style.width=Math.min(100,(val/max)*100)+'%';
+    document.getElementById(`stat-${id}-val`).textContent=val+suf;
+  };
+  set('dps',s.dps,MAX.dps); set('shield',s.shield,MAX.shield); set('armor',s.armor,MAX.armor);
+  set('speed',s.speed,MAX.speed); set('morale',s.morale,MAX.morale); set('range',s.range,MAX.range,' AU');
+}
+
+// ===== QUIZ =====
+function openQuiz() {
+  state.quizAnswered = false;
+  const q = QUIZ[state.quizIdx];
+  document.getElementById('quiz-cat').textContent = `◈ ${q.cat}`;
+  document.getElementById('quiz-q').textContent = q.q;
+  document.getElementById('quiz-reward-val').textContent = `${q.reward} 💰`;
+  document.getElementById('quiz-result').className = 'quiz-result';
+  const letters = ['A','B','C','D'];
+  document.getElementById('quiz-options').innerHTML = q.opts.map((o,i)=>`
+    <div class="quiz-opt" onclick="answerQuiz(${i})">
+      <span class="opt-letter">${letters[i]}</span><span>${o}</span>
+    </div>`).join('');
+  document.getElementById('quiz-modal').style.display='flex';
+}
+
+function answerQuiz(idx) {
+  if (state.quizAnswered) return;
+  state.quizAnswered = true;
+  const q = QUIZ[state.quizIdx];
+  document.querySelectorAll('.quiz-opt').forEach((o,i)=>{
+    o.classList.add('disabled');
+    if(i===q.ans) o.classList.add('correct');
+    else if(i===idx&&idx!==q.ans) o.classList.add('wrong');
+  });
+  const res = document.getElementById('quiz-result');
+  if (idx===q.ans) {
+    state.babki += q.reward;
+    updateBabki(true);
+    res.className='quiz-result show win';
+    document.getElementById('quiz-result-text').textContent=`✓ ВЕРНО! +${q.reward} БАБОК`;
+  } else {
+    res.className='quiz-result show lose';
+    document.getElementById('quiz-result-text').textContent=`✗ НЕВЕРНО. Правильный: ${['A','B','C','D'][q.ans]}`;
+  }
+}
+
+function nextQuestion() { state.quizIdx=Math.floor(Math.random()*QUIZ.length); openQuiz(); }
+function closeQuiz() { document.getElementById('quiz-modal').style.display='none'; }
+
+// ===== UTILS =====
+function updateBabki(pop=false) {
+  const el = document.getElementById('babki');
+  el.textContent = state.babki.toLocaleString();
+  if(pop){ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); renderShop(); }
+}
+
+function showNotif(msg, type='info') {
+  const el = document.createElement('div');
+  el.className=`notif ${type}`;
+  el.innerHTML=`<span>${type==='success'?'✓':type==='error'?'✗':'ℹ'}</span><span>${msg}</span>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+</script>
+</body>
+</html>
