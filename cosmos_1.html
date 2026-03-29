@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Интерактивная Карта Космоса</title>
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<div class="nebula"></div>
+
+<div id="start-overlay">
+
+  <!-- ЭКРАН ПРОДОЛЖЕНИЯ (показывается если профиль уже есть) -->
+  <div id="continue-panel" style="display:none;">
+    <div class="start-kicker">Добро пожаловать обратно</div>
+    <h2 id="continue-title">Командор</h2>
+    <p class="start-intro" id="continue-meta"></p>
+    <div id="continue-ship-info" style="margin-bottom:24px;"></div>
+    <div class="start-actions" style="gap:12px;flex-wrap:wrap;">
+      <button id="continue-button" type="button">▶ Продолжить экспедицию</button>
+      <button id="new-game-button" type="button" class="btn-secondary">Новая игра</button>
+    </div>
+  </div>
+
+  <!-- ЭКРАН СОЗДАНИЯ НОВОГО ПРОФИЛЯ -->
+  <div id="start-panel">
+    <div class="start-kicker">Стартовая палуба</div>
+    <h2>Создание командира</h2>
+    <p class="start-intro">Введите своё имя, выберите класс корабля и пилота — затем выведите экипаж на орбиту Земли.</p>
+
+    <!-- ИМЯ КОМАНДИРА -->
+    <div class="start-section">
+      <div class="start-section-title">Имя командира</div>
+      <div class="commander-name-wrap">
+        <input id="commander-name-input" type="text" maxlength="32"
+               placeholder="Введите имя командира…"
+               autocomplete="off" spellcheck="false">
+        <div class="commander-name-hint">Это имя будет сохранено в вашем профиле</div>
+      </div>
+    </div>
+
+    <div class="start-section">
+      <div class="start-section-title">Класс корабля</div>
+      <div id="ship-class-grid" class="selection-grid"></div>
+    </div>
+
+    <div class="start-section">
+      <div class="start-section-title">Пилот</div>
+      <div id="pilot-grid" class="pilot-grid"></div>
+    </div>
+
+    <div id="start-summary">
+      <div class="summary-label">Статус запуска</div>
+      <div id="start-summary-text">Введите имя командира, выберите класс корабля и пилота.</div>
+    </div>
+
+    <div class="start-actions">
+      <button id="launch-button" type="button" disabled>Запустить корабль</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <!-- LEFT: Constellations -->
+  <div id="constellation-panel">
+    <div class="panel-title">Созвездия</div>
+    <div id="constellation-list"></div>
+  </div>
+
+  <div id="nav-status">
+    <div id="nav-pill">Навигация недоступна</div>
+  </div>
+
+  <div id="audio-controls">
+    <button id="audio-toggle" type="button" aria-pressed="false">Музыка: выкл</button>
+    <div id="audio-caption">Фоновая атмосфера включается по клику</div>
+  </div>
+
+  <button id="cargo-btn" type="button" title="Трюм корабля">📦 Трюм</button>
+
+  <!-- CARGO HOLD OVERLAY -->
+  <div id="cargo-overlay">
+    <div id="cargo-panel">
+      <div class="cargo-header">
+        <div>
+          <div class="cargo-kicker">Корабль</div>
+          <h2>Трюм и инвентарь</h2>
+        </div>
+        <button class="close-btn" id="cargo-close-btn">✕</button>
+      </div>
+
+      <div id="cargo-tabs">
+        <button class="cargo-tab active" data-tab="resources">Ресурсы</button>
+        <button class="cargo-tab" data-tab="blueprints">Чертежи</button>
+        <button class="cargo-tab" data-tab="drones">Дроны</button>
+        <button class="cargo-tab" data-tab="items">Предметы</button>
+      </div>
+
+      <div id="cargo-content"></div>
+    </div>
+  </div>
+
+  <div id="flight-controls" class="inactive">
+    <div class="panel-title">Полет</div>
+    <div id="flight-mode-buttons"></div>
+    <div id="flight-action-buttons">
+      <button id="flight-stop-btn" class="flight-action-btn" type="button">Стоп</button>
+      <button id="flight-undock-btn" class="flight-action-btn" type="button">Отстыковаться</button>
+    </div>
+    <button id="camera-follow-btn" class="flight-action-btn wide" type="button">Камера: выкл</button>
+    <div id="flight-status">Корабль ожидает маршрут.</div>
+  </div>
+
+  <!-- SOLAR SYSTEM -->
+  <canvas id="solar-canvas"></canvas>
+
+  <div id="system-panel">
+    <div class="panel-title">Системы</div>
+    <div id="system-list"></div>
+    <div id="system-empty" style="display:none;">Выберите созвездие слева, чтобы открыть доступные звёздные системы.</div>
+    <div id="colony-panel">
+      <div class="leg-title">Колонизация</div>
+      <div id="resource-grid"></div>
+      <div id="colony-summary"></div>
+    </div>
+    <div id="legend">
+      <div class="leg-title">Легенда</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ffd54f"></div> Планеты</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#80cbc4"></div> Карликовые планеты</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#b0bec5"></div> Пояс астероидов</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#4fc3f7"></div> Кометы</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#ff6622"></div> 🐉 Нибиру</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(100,140,200,0.5)"></div> Облако Оорта</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#66bb6a"></div> Гипотетические</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#c8a96e;border:1px solid #ff9944"></div> 🛸 Межзвёздные</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#90caf9;border:1px solid #ffffff"></div> Игровые корабли</div>
+      <div class="leg-item" style="font-size:10px; color:rgba(255,255,255,0.25); margin-top:6px;">Клик = подробности</div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div id="header">
+    <h1>ИНТЕРАКТИВНАЯ КАРТА КОСМОСА</h1>
+  </div>
+
+  <!-- TOOLTIP -->
+  <div id="tooltip">
+    <h3 id="tt-title"></h3>
+    <p id="tt-body"></p>
+  </div>
+
+  <!-- INFO OVERLAY -->
+  <div id="info-overlay">
+    <div id="info-panel">
+      <button class="close-btn" onclick="closePanel()">✕</button>
+      <div id="panel-content"></div>
+    </div>
+  </div>
+
+  <div id="zoom-hint">Колесо мыши — масштаб · Перетащите — панорама</div>
+  <div id="profile-badge" style="display:none;">
+    <span class="badge-icon">👨‍✈️</span>
+    <span class="badge-name" id="badge-name-text"></span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     AUDIO — файлы хранятся в ./audio/
+════════════════════════════════════════ -->
+<audio id="audio-start" src="./audio/start.mp3"  loop preload="auto"></audio>
+<audio id="audio-game"  src="./audio/kosmos.mp3" loop preload="auto"></audio>
+
+<script>
+/* ── Музыкальный менеджер ─────────────────────────────────────────────
+   start.mp3  — играет на стартовом экране (запускается на первом клике)
+   kosmos.mp3 — играет в основной игре (управляется кнопкой #audio-toggle)
+   Переход: при «Запустить корабль» start плавно гасится, game плавно входит.
+──────────────────────────────────────────────────────────────────────── */
+(function () {
+  const audioStart = document.getElementById('audio-start');
+  const audioGame  = document.getElementById('audio-game');
+  const toggleBtn  = document.getElementById('audio-toggle');
+  const launchBtn  = document.getElementById('launch-button');
+
+  let startPlaying     = false;
+  let gameMusicEnabled = true;
+  let launched         = false;
+
+  /* Плавное изменение громкости */
+  function fadeTo(audio, targetVol, durationMs, onDone) {
+    const steps    = 40;
+    const interval = durationMs / steps;
+    const startVol = audio.volume;
+    const delta    = (targetVol - startVol) / steps;
+    let   current  = 0;
+    const timer = setInterval(() => {
+      current++;
+      audio.volume = Math.min(1, Math.max(0, startVol + delta * current));
+      if (current >= steps) {
+        clearInterval(timer);
+        audio.volume = targetVol;
+        if (targetVol === 0) audio.pause();
+        if (onDone) onDone();
+      }
+    }, interval);
+  }
+
+  /* Запуск start.mp3 на первом жесте (обход autoplay-блокировки) */
+  function tryStartMusic() {
+    if (startPlaying || launched) return;
+    audioStart.volume = 0;
+    audioStart.play().then(() => {
+      startPlaying = true;
+      fadeTo(audioStart, 0.6, 1500);
+    }).catch(() => {});
+  }
+
+  document.addEventListener('click',      tryStartMusic, { once: true });
+  document.addEventListener('touchstart', tryStartMusic, { once: true });
+  document.addEventListener('keydown',    tryStartMusic, { once: true });
+
+  /* Переход: старт → игра */
+  function handleLaunch() {
+    if (launched) return;
+    launched = true;
+
+    if (startPlaying) {
+      fadeTo(audioStart, 0, 1800);
+    }
+
+    if (gameMusicEnabled) {
+      audioGame.volume = 0;
+      audioGame.play().then(() => {
+        fadeTo(audioGame, 0.5, 2000);
+      }).catch(() => {});
+    }
+
+    updateToggleBtn();
+  }
+
+  /* capture:true — срабатываем раньше app.js */
+  launchBtn.addEventListener('click', handleLaunch, true);
+
+  /* Кнопка «Музыка» управляет только kosmos.mp3 */
+  toggleBtn.addEventListener('click', () => {
+    if (!launched) return;
+    gameMusicEnabled = !gameMusicEnabled;
+
+    if (gameMusicEnabled) {
+      audioGame.volume = 0;
+      audioGame.play().then(() => fadeTo(audioGame, 0.5, 1000)).catch(() => {});
+    } else {
+      fadeTo(audioGame, 0, 800);
+    }
+
+    updateToggleBtn();
+  });
+
+  function updateToggleBtn() {
+    const on = gameMusicEnabled && launched;
+    toggleBtn.textContent = on ? 'Музыка: вкл' : 'Музыка: выкл';
+    toggleBtn.setAttribute('aria-pressed', String(on));
+  }
+
+})();
+</script>
+
+<script src="./js/app.js"></script>
+</body>
+</html>
+
+
+
+
+
